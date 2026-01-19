@@ -1,7 +1,10 @@
 //! TrumanFS FUSE Daemon
 //!
-//! Communicates with Elixir via ETF over stdin/stdout.
+//! Communicates with Elixir via JSON over stdin/stdout (4-byte length prefix).
 //! All filesystem operations are checked against the Elixir-side whitelist.
+//!
+//! JSON chosen over ETF for "audit-first" logging - the Auditor appends raw
+//! bytes to audit.jsonl BEFORE parsing, so logs must be human-readable.
 
 mod protocol;
 
@@ -14,7 +17,7 @@ fn main() -> Result<()> {
     info!("truman_fused starting");
 
     // TODO: Parse CLI args for mount point, source directory
-    // TODO: Start ETF protocol handler
+    // TODO: Start JSON protocol handler
     // TODO: Mount FUSE filesystem
     // TODO: Run event loop
 
