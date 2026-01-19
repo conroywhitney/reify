@@ -1,8 +1,4 @@
 defmodule TrumanFsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest TrumanFs
-
-  test "greets the world" do
-    assert TrumanFs.hello() == :world
-  end
 end
