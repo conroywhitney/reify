@@ -2,15 +2,15 @@
 
 ## 1. Project Setup
 
-- [ ] 1.1 Create `reify_fs` app in umbrella (`mix new apps/reify_fs --sup`)
-- [ ] 1.2 Add Rustler dependency to `reify_fs/mix.exs`
+- [ ] 1.1 Create `truman_fs` app in umbrella (`mix new apps/truman_fs --sup`)
+- [ ] 1.2 Add Rustler dependency to `truman_fs/mix.exs`
 - [ ] 1.3 Initialize Rust NIF project with `mix rustler.new`
 - [ ] 1.4 Add `fuser` crate to Cargo.toml
 - [ ] 1.5 Verify NIF compiles and loads (hello world function)
 
 ## 2. Whitelist Module (Pure Elixir, TDD)
 
-- [ ] 2.1 Create `ReifyFs.Whitelist` module with ETS table
+- [ ] 2.1 Create `TrumanFs.Whitelist` module with ETS table
 - [ ] 2.2 Implement `new/1` - create whitelist with initial paths
 - [ ] 2.3 Implement `add/2` - add single path
 - [ ] 2.4 Implement `remove/2` - remove single path
@@ -22,7 +22,7 @@
 
 ## 3. FUSE NIF Foundation
 
-- [ ] 3.1 Define NIF function signatures in Elixir (`ReifyFs.Native`)
+- [ ] 3.1 Define NIF function signatures in Elixir (`TrumanFs.Native`)
 - [ ] 3.2 Implement basic FUSE mount/unmount in Rust
 - [ ] 3.3 Implement `getattr` callback (return file attributes or ENOENT)
 - [ ] 3.4 Implement `readdir` callback (list directory, filtering hidden entries)
@@ -32,7 +32,7 @@
 
 ## 4. Visibility Logic
 
-- [ ] 4.1 Create `ReifyFs.Fuse.Callbacks` module to handle FUSE events
+- [ ] 4.1 Create `TrumanFs.Fuse.Callbacks` module to handle FUSE events
 - [ ] 4.2 Wire whitelist checks into `getattr` (ENOENT for non-whitelisted)
 - [ ] 4.3 Wire whitelist filtering into `readdir`
 - [ ] 4.4 Wire whitelist checks into `open`/`read`/`write`
@@ -40,7 +40,7 @@
 
 ## 5. OTP Integration
 
-- [ ] 5.1 Create `ReifyFs.Fuse.Daemon` GenServer to manage mount lifecycle
+- [ ] 5.1 Create `TrumanFs.Fuse.Daemon` GenServer to manage mount lifecycle
 - [ ] 5.2 Add Daemon to application supervision tree
 - [ ] 5.3 Handle clean unmount on shutdown
 - [ ] 5.4 Handle crash recovery (whitelist survives via ETS heir)
@@ -57,6 +57,6 @@
 
 ## 7. Documentation
 
-- [ ] 7.1 Write module docs for `ReifyFs`
-- [ ] 7.2 Write README for reify_fs app
+- [ ] 7.1 Write module docs for `TrumanFs`
+- [ ] 7.2 Write README for truman_fs app
 - [ ] 7.3 Document FUSE installation requirements (macFUSE/FUSE-T)

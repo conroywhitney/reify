@@ -1,4 +1,4 @@
-defmodule Reify.MixProject do
+defmodule Truman.MixProject do
   use Mix.Project
 
   def project do

@@ -1,4 +1,4 @@
-# Reify - Claude Context
+# Truman - Claude Context
 
 > "LiveView for the Filesystem"
 
@@ -28,13 +28,13 @@ Agent sends: "grep TODO src/*.ex | head -5"
                     │
                     ▼
          ┌─────────────────────┐
-         │   HTTP/WS API       │ → Phoenix (reify_web)
+         │   HTTP/WS API       │ → Phoenix (truman_web)
          ├─────────────────────┤
-         │   Command Whitelist │ → RBAC check (reify_auth)
+         │   Command Whitelist │ → RBAC check (truman_auth)
          ├─────────────────────┤
-         │   Seatbelt Wrap     │ → sandbox-exec (reify_seatbelt)
+         │   Seatbelt Wrap     │ → sandbox-exec (truman_seatbelt)
          ├─────────────────────┤
-         │   FUSE Mount        │ → Only whitelisted files visible (reify_fs)
+         │   FUSE Mount        │ → Only whitelisted files visible (truman_fs)
          └─────────────────────┘
                     │
                     ▼
@@ -46,12 +46,12 @@ Agent sends: "grep TODO src/*.ex | head -5"
 
 | App | Description |
 |-----|-------------|
-| `reify_fs` | FUSE daemon with ETS-backed whitelist |
-| `reify_auth` | Actor types, command whitelist, RBAC |
-| `reify_sync` | Git-annex for large files, PubSub |
-| `reify_web` | Phoenix HTTP/WS API |
-| `reify_audit` | Dead man's switch, logging |
-| `reify_seatbelt` | OS sandbox wrappers |
+| `truman_fs` | FUSE daemon with ETS-backed whitelist |
+| `truman_auth` | Actor types, command whitelist, RBAC |
+| `truman_sync` | Git-annex for large files, PubSub |
+| `truman_web` | Phoenix HTTP/WS API |
+| `truman_audit` | Dead man's switch, logging |
+| `truman_seatbelt` | OS sandbox wrappers |
 
 ## Key Decisions
 
@@ -71,7 +71,7 @@ Agent sends: "grep TODO src/*.ex | head -5"
 | VFS Spike | https://github.com/conroywhitney/vfs_spike/ | Early FUSE experiments |
 | Truman Shell | https://github.com/conroywhitney/truman-shell | POSIX reimplementation (superseded) |
 | ClaudeBox | https://github.com/conroywhitney/claudebox/ | Original sandboxing research |
-| IExReAct | https://github.com/conroywhitney/IExReAct | Agent loop (will consume Reify) |
+| IExReAct | https://github.com/conroywhitney/IExReAct | Agent loop (will consume Truman) |
 
 ## Commands
 
@@ -101,4 +101,4 @@ Doctests serve dual purposes:
 
 ## Current State
 
-Ready to implement. Start with `reify_fs` (FUSE daemon with ETS whitelist).
+Ready to implement. Start with `truman_fs` (FUSE daemon with ETS whitelist).

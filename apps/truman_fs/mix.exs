@@ -1,9 +1,9 @@
-defmodule ReifyFs.MixProject do
+defmodule TrumanFs.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :reify_fs,
+      app: :truman_fs,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -19,7 +19,7 @@ defmodule ReifyFs.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {ReifyFs.Application, []}
+      mod: {TrumanFs.Application, []}
     ]
   end
 

@@ -1,10 +1,10 @@
 ## Context
 
-Reify needs a filesystem visibility layer that makes unauthorized files literally not exist. Traditional permission models (Unix file permissions, ACLs) return "Permission denied" which reveals the existence of protected resources. We need the "404 principle" - if you can't access it, it doesn't exist.
+Truman needs a filesystem visibility layer that makes unauthorized files literally not exist. Traditional permission models (Unix file permissions, ACLs) return "Permission denied" which reveals the existence of protected resources. We need the "404 principle" - if you can't access it, it doesn't exist.
 
 FUSE (Filesystem in Userspace) lets us intercept filesystem operations and filter them based on a whitelist before passing through to the real filesystem.
 
-This is the first component of the Reify stack. Other components (`reify_seatbelt`, `reify_auth`, `reify_web`) will build on this foundation.
+This is the first component of the Truman stack. Other components (`truman_seatbelt`, `truman_auth`, `truman_web`) will build on this foundation.
 
 ## Goals / Non-Goals
 
@@ -19,8 +19,8 @@ This is the first component of the Reify stack. Other components (`reify_seatbel
 **Non-Goals:**
 - Linux support (future work, different FUSE library)
 - Windows support (separate effort entirely)
-- Network filtering (that's `reify_seatbelt` + proxy layer)
-- Command whitelisting (that's `reify_auth`)
+- Network filtering (that's `truman_seatbelt` + proxy layer)
+- Command whitelisting (that's `truman_auth`)
 - Full POSIX reimplementation (we dropped that approach)
 
 ## Decisions
@@ -138,10 +138,10 @@ If the process that owns the ETS table crashes, the table is deleted.
 ## Module Structure
 
 ```
-apps/reify_fs/
+apps/truman_fs/
 ├── lib/
-│   ├── reify_fs.ex              # Public API
-│   ├── reify_fs/
+│   ├── truman_fs.ex              # Public API
+│   ├── truman_fs/
 │   │   ├── application.ex       # OTP Application
 │   │   ├── whitelist.ex         # ETS-backed whitelist
 │   │   ├── fuse/
@@ -150,7 +150,7 @@ apps/reify_fs/
 │   │   └── native.ex            # Rustler NIF module
 │   └── ...
 ├── native/
-│   └── reify_fs_nif/            # Rust NIF using fuser crate
+│   └── truman_fs_nif/            # Rust NIF using fuser crate
 │       ├── Cargo.toml
 │       └── src/
 │           └── lib.rs

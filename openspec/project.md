@@ -11,7 +11,7 @@ A secure, reactive filesystem shell where human and AI operate in the same share
 ## Tech Stack
 
 - **Elixir/OTP** - Supervision trees, fault tolerance, concurrency
-- **Phoenix** - HTTP/WebSocket API (reify_web)
+- **Phoenix** - HTTP/WebSocket API (truman_web)
 - **FUSE** - Filesystem in Userspace for visibility control
 - **Seatbelt/Landlock** - OS-level sandbox enforcement
 - **ETS** - In-memory whitelist storage
@@ -24,7 +24,7 @@ A secure, reactive filesystem shell where human and AI operate in the same share
 - `mix format` - Standard Elixir formatter
 - `mix credo --strict` - Static analysis
 - `mix dialyzer` - Type checking with Dialyxir
-- Snake_case for modules (`ReifyFs`), functions (`allowed?`), variables
+- Snake_case for modules (`TrumanFs`), functions (`allowed?`), variables
 
 ### Architecture Patterns
 
@@ -32,12 +32,12 @@ A secure, reactive filesystem shell where human and AI operate in the same share
 
 | App | Purpose |
 |-----|---------|
-| `reify_fs` | FUSE daemon, ETS whitelist, visibility control |
-| `reify_auth` | RBAC, actor types, command whitelist |
-| `reify_sync` | Git-annex integration, PubSub notifications |
-| `reify_web` | Phoenix HTTP/WS API |
-| `reify_audit` | Auditor (dead man's switch), logging |
-| `reify_seatbelt` | macOS Seatbelt / Linux Landlock wrappers |
+| `truman_fs` | FUSE daemon, ETS whitelist, visibility control |
+| `truman_auth` | RBAC, actor types, command whitelist |
+| `truman_sync` | Git-annex integration, PubSub notifications |
+| `truman_web` | Phoenix HTTP/WS API |
+| `truman_audit` | Auditor (dead man's switch), logging |
+| `truman_seatbelt` | macOS Seatbelt / Linux Landlock wrappers |
 
 **Defense in Depth:**
 1. FUSE - Files don't exist outside whitelist (visibility)

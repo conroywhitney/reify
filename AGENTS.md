@@ -1,6 +1,6 @@
 # Agent Development Guide
 
-> Best practices for AI agents working on Reify
+> Best practices for AI agents working on Truman
 
 ## Development Workflow
 
@@ -21,9 +21,9 @@
 
 # 1. RED: Write failing test
 test "whitelist allows configured paths" do
-  whitelist = Reify.FS.Whitelist.new(["/home/user/projects"])
-  assert Reify.FS.Whitelist.allowed?(whitelist, "/home/user/projects/foo.txt")
-  refute Reify.FS.Whitelist.allowed?(whitelist, "/etc/passwd")
+  whitelist = Truman.FS.Whitelist.new(["/home/user/projects"])
+  assert Truman.FS.Whitelist.allowed?(whitelist, "/home/user/projects/foo.txt")
+  refute Truman.FS.Whitelist.allowed?(whitelist, "/etc/passwd")
 end
 
 # 2. GREEN: Minimal implementation
@@ -42,8 +42,8 @@ Check if a path is allowed by the whitelist.
 
 ## Examples
 
-    iex> whitelist = Reify.FS.Whitelist.new(["/home/user"])
-    iex> Reify.FS.Whitelist.allowed?(whitelist, "/home/user/file.txt")
+    iex> whitelist = Truman.FS.Whitelist.new(["/home/user"])
+    iex> Truman.FS.Whitelist.allowed?(whitelist, "/home/user/file.txt")
     true
 
 """
@@ -150,16 +150,16 @@ git push              # Push (never --force)
 
 ## Architecture Overview
 
-Reify is an umbrella app with these sub-applications:
+Truman is an umbrella app with these sub-applications:
 
 | App | Purpose |
 |-----|---------|
-| `reify_fs` | FUSE daemon, ETS whitelist, visibility control |
-| `reify_auth` | RBAC, actor types, command whitelist |
-| `reify_sync` | Git-annex integration, PubSub notifications |
-| `reify_web` | Phoenix HTTP/WS API |
-| `reify_audit` | Auditor (dead man's switch), logging |
-| `reify_seatbelt` | macOS Seatbelt / Linux Landlock wrappers |
+| `truman_fs` | FUSE daemon, ETS whitelist, visibility control |
+| `truman_auth` | RBAC, actor types, command whitelist |
+| `truman_sync` | Git-annex integration, PubSub notifications |
+| `truman_web` | Phoenix HTTP/WS API |
+| `truman_audit` | Auditor (dead man's switch), logging |
+| `truman_seatbelt` | macOS Seatbelt / Linux Landlock wrappers |
 
 ## The Prime Directive
 

@@ -2,11 +2,11 @@
 
 Agents need a filesystem playground where unauthorized files literally don't exist (404, not 403). Current containment approaches either block everything (unusable) or leak information through permission errors (probeable). FUSE lets us control visibility at the kernel level, making the whitelist unforgeable by processes inside the playground.
 
-This is the foundation layer that all other Reify components build on. Without filesystem visibility control, the rest of the stack has nothing to protect.
+This is the foundation layer that all other Truman components build on. Without filesystem visibility control, the rest of the stack has nothing to protect.
 
 ## What Changes
 
-- New `reify_fs` umbrella app with OTP supervision tree
+- New `truman_fs` umbrella app with OTP supervision tree
 - ETS-backed whitelist for O(1) path lookups
 - FUSE daemon that filters `readdir`, `getattr`, `open` based on whitelist
 - The "404 principle" - non-whitelisted paths return ENOENT (No such file), not EACCES (Permission denied)
@@ -35,9 +35,9 @@ This is the foundation layer that all other Reify components build on. Without f
 - **Windows**: Separate effort entirely (WinFsp + AppContainer) - not in scope
 
 ### Downstream
-- Foundation for `reify_seatbelt` (defense in depth)
-- Foundation for `reify_auth` (command whitelist checks paths)
-- Foundation for `reify_web` (API exposes whitelist management)
+- Foundation for `truman_seatbelt` (defense in depth)
+- Foundation for `truman_auth` (command whitelist checks paths)
+- Foundation for `truman_web` (API exposes whitelist management)
 
 ## Open Questions
 

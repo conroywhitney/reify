@@ -1,7 +1,7 @@
-defmodule ReifyFs.WhitelistTest do
+defmodule TrumanFs.WhitelistTest do
   use ExUnit.Case, async: true
 
-  alias ReifyFs.Whitelist
+  alias TrumanFs.Whitelist
 
   describe "new/1" do
     test "creates whitelist with initial paths" do

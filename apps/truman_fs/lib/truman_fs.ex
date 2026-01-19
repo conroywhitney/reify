@@ -1,6 +1,6 @@
-defmodule ReifyFs do
+defmodule TrumanFs do
   @moduledoc """
-  Documentation for `ReifyFs`.
+  Documentation for `TrumanFs`.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule ReifyFs do
 
   ## Examples
 
-      iex> ReifyFs.hello()
+      iex> TrumanFs.hello()
       :world
 
   """

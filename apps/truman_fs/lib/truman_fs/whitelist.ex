@@ -1,4 +1,4 @@
-defmodule ReifyFs.Whitelist do
+defmodule TrumanFs.Whitelist do
   @moduledoc """
   Manages which filesystem paths are visible within the playground.
 
@@ -15,8 +15,8 @@ defmodule ReifyFs.Whitelist do
 
   ## Examples
 
-      iex> whitelist = ReifyFs.Whitelist.new(["/home/user/projects"])
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/home/user/projects/app.ex")
+      iex> whitelist = TrumanFs.Whitelist.new(["/home/user/projects"])
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/home/user/projects/app.ex")
       true
 
   """
@@ -37,9 +37,9 @@ defmodule ReifyFs.Whitelist do
 
   ## Examples
 
-      iex> whitelist = ReifyFs.Whitelist.new([])
-      iex> whitelist = ReifyFs.Whitelist.add_all(whitelist, ["/a", "/b"])
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/a")
+      iex> whitelist = TrumanFs.Whitelist.new([])
+      iex> whitelist = TrumanFs.Whitelist.add_all(whitelist, ["/a", "/b"])
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/a")
       true
 
   """
@@ -55,9 +55,9 @@ defmodule ReifyFs.Whitelist do
 
   ## Examples
 
-      iex> whitelist = ReifyFs.Whitelist.new([])
-      iex> whitelist = ReifyFs.Whitelist.add(whitelist, "/home/user/projects")
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/home/user/projects")
+      iex> whitelist = TrumanFs.Whitelist.new([])
+      iex> whitelist = TrumanFs.Whitelist.add(whitelist, "/home/user/projects")
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/home/user/projects")
       true
 
   """
@@ -73,9 +73,9 @@ defmodule ReifyFs.Whitelist do
 
   ## Examples
 
-      iex> whitelist = ReifyFs.Whitelist.new(["/a", "/b", "/c"])
-      iex> whitelist = ReifyFs.Whitelist.remove_all(whitelist, ["/a", "/b"])
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/c")
+      iex> whitelist = TrumanFs.Whitelist.new(["/a", "/b", "/c"])
+      iex> whitelist = TrumanFs.Whitelist.remove_all(whitelist, ["/a", "/b"])
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/c")
       true
 
   """
@@ -91,9 +91,9 @@ defmodule ReifyFs.Whitelist do
 
   ## Examples
 
-      iex> whitelist = ReifyFs.Whitelist.new(["/home/user/projects"])
-      iex> whitelist = ReifyFs.Whitelist.remove(whitelist, "/home/user/projects")
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/home/user/projects")
+      iex> whitelist = TrumanFs.Whitelist.new(["/home/user/projects"])
+      iex> whitelist = TrumanFs.Whitelist.remove(whitelist, "/home/user/projects")
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/home/user/projects")
       false
 
   """
@@ -111,8 +111,8 @@ defmodule ReifyFs.Whitelist do
 
   ## Examples
 
-      iex> whitelist = ReifyFs.Whitelist.new(["/tmp", "/home"])
-      iex> ReifyFs.Whitelist.list(whitelist) |> Enum.sort()
+      iex> whitelist = TrumanFs.Whitelist.new(["/tmp", "/home"])
+      iex> TrumanFs.Whitelist.list(whitelist) |> Enum.sort()
       ["/home", "/tmp"]
 
   """
@@ -129,12 +129,12 @@ defmodule ReifyFs.Whitelist do
 
   ## Examples
 
-      iex> whitelist = ReifyFs.Whitelist.new(["/home/user/projects"])
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/home/user/projects")
+      iex> whitelist = TrumanFs.Whitelist.new(["/home/user/projects"])
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/home/user/projects")
       true
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/home/user/projects/app/lib/main.ex")
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/home/user/projects/app/lib/main.ex")
       true
-      iex> ReifyFs.Whitelist.allowed?(whitelist, "/etc/passwd")
+      iex> TrumanFs.Whitelist.allowed?(whitelist, "/etc/passwd")
       false
 
   """
