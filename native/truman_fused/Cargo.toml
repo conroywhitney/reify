@@ -6,6 +6,7 @@ description = "FUSE daemon for TrumanFS - whitelist-based filesystem visibility"
 
 [dependencies]
 # FUSE filesystem
+# Note: fuser 0.16.0 has macOS build regression, staying on 0.15 for now
 fuser = "0.15"
 
 # JSON for Port communication (audit-first logging requires human-readable format)
@@ -13,6 +14,9 @@ serde_json = "1.0"
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
+
+# Base64 encoding for binary data in JSON
+base64 = "0.22"
 
 # Error handling
 anyhow = "1.0"
