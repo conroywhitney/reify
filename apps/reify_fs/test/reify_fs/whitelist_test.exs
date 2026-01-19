@@ -52,6 +52,44 @@ defmodule ReifyFs.WhitelistTest do
     end
   end
 
+  describe "add_all/2" do
+    test "adds multiple paths at once" do
+      whitelist = Whitelist.new([])
+      whitelist = Whitelist.add_all(whitelist, ["/a", "/b", "/c"])
+
+      assert Whitelist.allowed?(whitelist, "/a")
+      assert Whitelist.allowed?(whitelist, "/b")
+      assert Whitelist.allowed?(whitelist, "/c")
+    end
+  end
+
+  describe "remove_all/2" do
+    test "removes multiple paths at once" do
+      whitelist = Whitelist.new(["/a", "/b", "/c"])
+      whitelist = Whitelist.remove_all(whitelist, ["/a", "/b"])
+
+      refute Whitelist.allowed?(whitelist, "/a")
+      refute Whitelist.allowed?(whitelist, "/b")
+      assert Whitelist.allowed?(whitelist, "/c")
+    end
+  end
+
+  describe "list/1" do
+    test "returns all whitelisted paths" do
+      whitelist = Whitelist.new(["/home/user/projects", "/tmp"])
+
+      paths = Whitelist.list(whitelist)
+
+      assert Enum.sort(paths) == ["/home/user/projects", "/tmp"]
+    end
+
+    test "returns empty list for empty whitelist" do
+      whitelist = Whitelist.new([])
+
+      assert Whitelist.list(whitelist) == []
+    end
+  end
+
   describe "allowed?/2 with prefix matching" do
     test "allows child paths under whitelisted directory" do
       whitelist = Whitelist.new(["/home/user/projects"])

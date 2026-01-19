@@ -33,6 +33,22 @@ defmodule ReifyFs.Whitelist do
   end
 
   @doc """
+  Adds multiple paths to the whitelist at once.
+
+  ## Examples
+
+      iex> whitelist = ReifyFs.Whitelist.new([])
+      iex> whitelist = ReifyFs.Whitelist.add_all(whitelist, ["/a", "/b"])
+      iex> ReifyFs.Whitelist.allowed?(whitelist, "/a")
+      true
+
+  """
+  @spec add_all(t(), [String.t()]) :: t()
+  def add_all(%__MODULE__{} = whitelist, paths) when is_list(paths) do
+    Enum.reduce(paths, whitelist, &add(&2, &1))
+  end
+
+  @doc """
   Adds a path to the whitelist.
 
   This operation is idempotent - adding an already-whitelisted path has no effect.
@@ -53,6 +69,22 @@ defmodule ReifyFs.Whitelist do
   end
 
   @doc """
+  Removes multiple paths from the whitelist at once.
+
+  ## Examples
+
+      iex> whitelist = ReifyFs.Whitelist.new(["/a", "/b", "/c"])
+      iex> whitelist = ReifyFs.Whitelist.remove_all(whitelist, ["/a", "/b"])
+      iex> ReifyFs.Whitelist.allowed?(whitelist, "/c")
+      true
+
+  """
+  @spec remove_all(t(), [String.t()]) :: t()
+  def remove_all(%__MODULE__{} = whitelist, paths) when is_list(paths) do
+    Enum.reduce(paths, whitelist, &remove(&2, &1))
+  end
+
+  @doc """
   Removes a path from the whitelist.
 
   This operation is idempotent - removing a non-whitelisted path has no effect.
@@ -70,6 +102,23 @@ defmodule ReifyFs.Whitelist do
     normalized = normalize_path(path)
     :ets.delete(table, normalized)
     whitelist
+  end
+
+  @doc """
+  Lists all whitelisted paths.
+
+  Returns only the top-level whitelisted paths, not expanded children.
+
+  ## Examples
+
+      iex> whitelist = ReifyFs.Whitelist.new(["/tmp", "/home"])
+      iex> ReifyFs.Whitelist.list(whitelist) |> Enum.sort()
+      ["/home", "/tmp"]
+
+  """
+  @spec list(t()) :: [String.t()]
+  def list(%__MODULE__{table: table}) do
+    :ets.foldl(fn {path, _}, acc -> [path | acc] end, [], table)
   end
 
   @doc """
