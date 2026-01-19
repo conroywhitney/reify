@@ -1,9 +1,9 @@
+# Used by "mix format"
 [
   inputs: [
     "{mix,.formatter}.exs",
-    "{config,lib,test}/**/*.{ex,exs}",
-    "apps/*/mix.exs",
-    "apps/*/{config,lib,test}/**/*.{ex,exs}"
+    "{config,lib,test}/**/*.{ex,exs}"
   ],
-  plugins: [Styler]
+  plugins: [Styler],
+  subdirectories: ["apps/*"]
 ]
