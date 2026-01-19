@@ -33,6 +33,46 @@ defmodule ReifyFs.Whitelist do
   end
 
   @doc """
+  Adds a path to the whitelist.
+
+  This operation is idempotent - adding an already-whitelisted path has no effect.
+
+  ## Examples
+
+      iex> whitelist = ReifyFs.Whitelist.new([])
+      iex> whitelist = ReifyFs.Whitelist.add(whitelist, "/home/user/projects")
+      iex> ReifyFs.Whitelist.allowed?(whitelist, "/home/user/projects")
+      true
+
+  """
+  @spec add(t(), String.t()) :: t()
+  def add(%__MODULE__{table: table} = whitelist, path) do
+    normalized = normalize_path(path)
+    :ets.insert(table, {normalized, true})
+    whitelist
+  end
+
+  @doc """
+  Removes a path from the whitelist.
+
+  This operation is idempotent - removing a non-whitelisted path has no effect.
+
+  ## Examples
+
+      iex> whitelist = ReifyFs.Whitelist.new(["/home/user/projects"])
+      iex> whitelist = ReifyFs.Whitelist.remove(whitelist, "/home/user/projects")
+      iex> ReifyFs.Whitelist.allowed?(whitelist, "/home/user/projects")
+      false
+
+  """
+  @spec remove(t(), String.t()) :: t()
+  def remove(%__MODULE__{table: table} = whitelist, path) do
+    normalized = normalize_path(path)
+    :ets.delete(table, normalized)
+    whitelist
+  end
+
+  @doc """
   Checks if a path is allowed by the whitelist.
 
   A path is allowed if it exactly matches a whitelisted path, or if it's
