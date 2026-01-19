@@ -110,4 +110,48 @@ defmodule TrumanFs.WhitelistTest do
       refute Whitelist.allowed?(whitelist, "/home/user/projects-backup/file.txt")
     end
   end
+
+  describe "allowed?/2 security - path traversal attacks" do
+    test "rejects basic path traversal attack" do
+      whitelist = Whitelist.new(["/home/user/projects"])
+
+      # Attack: try to escape via ../
+      refute Whitelist.allowed?(whitelist, "/home/user/projects/../secrets/file.txt")
+    end
+
+    test "rejects nested path traversal attack" do
+      whitelist = Whitelist.new(["/home/user/projects"])
+
+      # Attack: deeply nested traversal
+      refute Whitelist.allowed?(whitelist, "/home/user/projects/subdir/../../secrets/file.txt")
+    end
+
+    test "rejects path traversal to root" do
+      whitelist = Whitelist.new(["/home/user/projects"])
+
+      # Attack: traverse all the way to root and access /etc
+      refute Whitelist.allowed?(whitelist, "/home/user/projects/../../../etc/passwd")
+    end
+
+    test "allows valid nested paths" do
+      whitelist = Whitelist.new(["/home/user/projects"])
+
+      # Valid: nested path that stays within whitelist
+      assert Whitelist.allowed?(whitelist, "/home/user/projects/app/lib/../config/app.exs")
+    end
+
+    test "handles unicode paths correctly" do
+      whitelist = Whitelist.new(["/home/user/проекты"])
+
+      assert Whitelist.allowed?(whitelist, "/home/user/проекты/файл.txt")
+      refute Whitelist.allowed?(whitelist, "/home/user/проекты/../секреты/файл.txt")
+    end
+
+    test "handles empty paths" do
+      whitelist = Whitelist.new(["/home/user/projects"])
+
+      # Empty path expands to current directory, which is not in whitelist
+      refute Whitelist.allowed?(whitelist, "")
+    end
+  end
 end

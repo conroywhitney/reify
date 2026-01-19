@@ -2,9 +2,15 @@ defmodule TrumanFs.Whitelist do
   @moduledoc """
   Manages which filesystem paths are visible within the playground.
 
-  Uses ETS for O(1) lookups. Paths are matched by prefix - if a directory
+  Uses ETS for storage. Paths are matched by prefix - if a directory
   is whitelisted, all its children are automatically allowed.
+
+  Note: `allowed?/2` currently scans all entries (O(n) where n = number of
+  whitelisted paths). For typical usage with small whitelists, this is fine.
+  If needed, can be optimized later with a trie-based structure.
   """
+
+  alias TrumanFs.Playground
 
   defstruct [:table]
 
@@ -152,12 +158,16 @@ defmodule TrumanFs.Whitelist do
   end
 
   # Checks if `path` is equal to or a child of `parent`
+  # Delegates to Playground for consistent boundary checking
   defp child_path?(path, parent) do
-    path == parent || String.starts_with?(path, parent <> "/")
+    Playground.path_within_playground?(path, parent)
   end
 
-  # Normalizes a path by removing trailing slashes
+  # Normalizes a path by expanding (resolves .., ., ~) and removing trailing slashes.
+  # This is critical for security - prevents path traversal attacks.
   defp normalize_path(path) do
-    path |> String.trim_trailing("/")
+    path
+    |> Path.expand()
+    |> String.trim_trailing("/")
   end
 end
