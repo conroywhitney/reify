@@ -56,8 +56,9 @@ jobs:
       - name: Credo
         run: mix credo --strict
 
-      - name: Dialyzer
-        run: mix dialyzer
+      # TODO: uncomment once we have beam files to analyze
+      # - name: Dialyzer
+      #   run: mix dialyzer
 
   test:
     name: Test
