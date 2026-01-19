@@ -1,31 +1,102 @@
 # Project Context
 
+> "LiveView for the Filesystem"
+
 ## Purpose
-[Describe your project's purpose and goals]
+
+A secure, reactive filesystem shell where human and AI operate in the same shared playground. Files only exist if they're whitelisted. Commands only run if they're allowed. Everything is mediated, auditable, and fail-safe.
+
+**Core Insight**: Helpful agents are more dangerous than malicious ones. A playground that says "yes" to safe things beats a prison that says "no" to everything.
 
 ## Tech Stack
-- [List your primary technologies]
-- [e.g., TypeScript, React, Node.js]
+
+- **Elixir/OTP** - Supervision trees, fault tolerance, concurrency
+- **Phoenix** - HTTP/WebSocket API (truman_web)
+- **FUSE** - Filesystem in Userspace for visibility control
+- **Seatbelt/Landlock** - OS-level sandbox enforcement
+- **ETS** - In-memory whitelist storage
+- **Git-annex** - Large file synchronization
 
 ## Project Conventions
 
 ### Code Style
-[Describe your code style preferences, formatting rules, and naming conventions]
+
+- `mix format` - Standard Elixir formatter
+- `mix credo --strict` - Static analysis
+- `mix dialyzer` - Type checking with Dialyxir
+- Snake_case for modules (`TrumanFs`), functions (`allowed?`), variables
 
 ### Architecture Patterns
-[Document your architectural decisions and patterns]
+
+**Umbrella App Structure:**
+
+| App | Purpose |
+|-----|---------|
+| `truman_fs` | FUSE daemon, ETS whitelist, visibility control |
+| `truman_auth` | RBAC, actor types, command whitelist |
+| `truman_sync` | Git-annex integration, PubSub notifications |
+| `truman_web` | Phoenix HTTP/WS API |
+| `truman_audit` | Auditor (dead man's switch), logging |
+| `truman_seatbelt` | macOS Seatbelt / Linux Landlock wrappers |
+
+**Defense in Depth:**
+1. FUSE - Files don't exist outside whitelist (visibility)
+2. Seatbelt/Landlock - Kernel-level enforcement (backup)
+3. Command whitelist - Only approved commands run (RBAC)
+4. Auditor - Dead man's switch supervision (fail-safe)
 
 ### Testing Strategy
-[Explain your testing approach and requirements]
+
+**TDD: Red-Green-Refactor**
+1. Write a failing test
+2. Write minimum code to pass
+3. Refactor while keeping green
+
+**Doctests for Public APIs** - Living documentation that enforces contracts
+
+**Test Private Functions Through Public API** - If it needs its own tests, it should be its own module
 
 ### Git Workflow
-[Describe your branching strategy and commit conventions]
+
+- Feature branches: `feature/<name>`, `chore/<name>`, `fix/<name>`
+- Squash merges to main
+- Atomic commits preferred
+- Auto-commit in TDD mode when tests pass
+- Never force push
 
 ## Domain Context
-[Add domain-specific knowledge that AI assistants need to understand]
+
+### The 404 Principle
+Protected paths return "No such file or directory" NOT "Permission denied" — prevents probing attacks. Files outside the whitelist literally don't exist from the perspective of processes in the playground.
+
+### Actor Types
+Different actors (human, agent, git, web) get different permissions:
+- **Human**: Full access (unrestricted playground)
+- **Agent**: Read whitelisted files, run whitelisted commands
+- **Git**: Access specific repos, not all of GitHub
+- **Web**: Blocklist + whitelist + HITL approval
+
+### Key Decisions
+1. FUSE for visibility (not just permissions)
+2. Seatbelt as backup defense layer
+3. External .git directories (no info leak)
+4. Git-annex for large files (not WebSocket streaming)
+5. Command whitelist with RBAC
+6. Drop POSIX reimplementation - use real commands
+7. Auditor as dead man's switch
+8. Two-layer network control (Seatbelt + Proxy)
 
 ## Important Constraints
-[List any technical, business, or regulatory constraints]
+
+- **Security First**: Every design decision prioritizes containment
+- **Fail-Safe**: If supervision fails, playground locks down to deny-all
+- **No Info Leak**: Even error messages shouldn't reveal protected paths
+- **Cross-Platform**: macOS (Seatbelt) and Linux (Landlock) support needed
 
 ## External Dependencies
-[Document key external services, APIs, or systems]
+
+- **FUSE**: macFUSE or FUSE-T on macOS, libfuse on Linux
+- **Git-annex**: For large file sync
+- **Phoenix PubSub**: For reactive notifications
+- **Seatbelt**: macOS sandbox-exec
+- **Landlock**: Linux kernel sandboxing (5.13+)

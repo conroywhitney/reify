@@ -1,18 +1,104 @@
-<!-- OPENSPEC:START -->
-# OpenSpec Instructions
+# Truman - Claude Context
 
-These instructions are for AI assistants working in this project.
+> "LiveView for the Filesystem"
 
-Always open `@/openspec/AGENTS.md` when the request:
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
+## What Is This?
 
-Use `@/openspec/AGENTS.md` to learn:
-- How to create and apply change proposals
-- Spec format and conventions
-- Project structure and guidelines
+A secure, reactive filesystem shell where human and AI operate in the same shared playground. Files only exist if they're whitelisted. Commands only run if they're allowed. Everything is mediated, auditable, and fail-safe.
 
-Keep this managed block so 'openspec update' can refresh the instructions.
+## Key Concepts
 
-<!-- OPENSPEC:END -->
+### The 404 Principle
+Protected paths return "No such file or directory" NOT "Permission denied" — prevents probing attacks.
+
+### Core Insight
+**Helpful agents are more dangerous than malicious ones.** Claude escaped ClaudeBox by wanting to run Elixir — not by being adversarial. A playground that says "yes" to safe things beats a prison that says "no" to everything.
+
+### Defense in Depth
+Multiple independent layers:
+1. **FUSE** — Files don't exist outside whitelist (visibility)
+2. **Seatbelt/Landlock** — Kernel-level enforcement (backup)
+3. **Command whitelist** — Only approved commands run (RBAC)
+4. **Auditor** — Dead man's switch supervision (fail-safe)
+
+## Architecture
+
+```
+Agent sends: "grep TODO src/*.ex | head -5"
+                    │
+                    ▼
+         ┌─────────────────────┐
+         │   HTTP/WS API       │ → Phoenix (truman_web)
+         ├─────────────────────┤
+         │   Command Whitelist │ → RBAC check (truman_auth)
+         ├─────────────────────┤
+         │   Seatbelt Wrap     │ → sandbox-exec (truman_seatbelt)
+         ├─────────────────────┤
+         │   FUSE Mount        │ → Only whitelisted files visible (truman_fs)
+         └─────────────────────┘
+                    │
+                    ▼
+         Real grep, real files, real output
+         (but only what you're allowed to see)
+```
+
+## Sub-Applications
+
+| App | Description |
+|-----|-------------|
+| `truman_fs` | FUSE daemon with ETS-backed whitelist |
+| `truman_auth` | Actor types, command whitelist, RBAC |
+| `truman_sync` | Git-annex for large files, PubSub |
+| `truman_web` | Phoenix HTTP/WS API |
+| `truman_audit` | Dead man's switch, logging |
+| `truman_seatbelt` | OS sandbox wrappers |
+
+## Key Decisions
+
+1. **FUSE for visibility** — Files outside whitelist don't exist
+2. **Seatbelt as backup** — Kernel enforcement if FUSE bypassed
+3. **External .git** — No info leak from git internals
+4. **Git-annex for large files** — Not raw WebSocket streaming
+5. **Command whitelist with RBAC** — Per-actor permissions
+6. **Drop POSIX reimplementation** — Real commands in playground
+7. **Auditor as dead man's switch** — Fail-safe supervision
+8. **Network gatekeepers** — Seatbelt + Proxy for URL filtering
+
+## Related Projects
+
+| Project | Location | Relationship |
+|---------|----------|--------------|
+| VFS Spike | https://github.com/conroywhitney/vfs_spike/ | Early FUSE experiments |
+| Truman Shell | https://github.com/conroywhitney/truman-shell | POSIX reimplementation (superseded) |
+| ClaudeBox | https://github.com/conroywhitney/claudebox/ | Original sandboxing research |
+| IExReAct | https://github.com/conroywhitney/IExReAct | Agent loop (will consume Truman) |
+
+## Commands
+
+```bash
+mix test              # Run tests
+mix deps.get          # Fetch dependencies
+mix format            # Format code
+mix credo --strict    # Static analysis
+mix dialyzer          # Type checking
+```
+
+## Testing Philosophy
+
+### Doctests = Living Documentation
+Doctests serve dual purposes:
+1. **Documentation** — Users see real, working examples in the docs
+2. **Regression tests** — If the API changes, doctests fail immediately
+
+### Test Private Functions Through Public API
+- Elixir culture: if it's private (`defp`), it's an implementation detail
+- If a private function needs its own tests, it should be its own module
+
+## Open Questions
+
+- **FUSE library**: Rust NIF vs existing Elixir/Erlang binding?
+- **macOS FUSE**: macFUSE vs FUSE-T?
+
+## Current State
+
+Ready to implement. Start with `truman_fs` (FUSE daemon with ETS whitelist).

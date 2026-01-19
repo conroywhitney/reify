@@ -1,0 +1,2 @@
+target/
+# Note: Cargo.lock is committed for binary crates (reproducible builds)
