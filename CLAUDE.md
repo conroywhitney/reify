@@ -4,7 +4,7 @@
 
 ## What Is This?
 
-A secure, reactive filesystem shell where human and AI operate in the same sandboxed environment. Files only exist if they're whitelisted. Commands only run if they're allowed. Everything is mediated, auditable, and fail-safe.
+A secure, reactive filesystem shell where human and AI operate in the same shared playground. Files only exist if they're whitelisted. Commands only run if they're allowed. Everything is mediated, auditable, and fail-safe.
 
 ## Key Concepts
 
@@ -60,7 +60,7 @@ Agent sends: "grep TODO src/*.ex | head -5"
 3. **External .git** — No info leak from git internals
 4. **Git-annex for large files** — Not raw WebSocket streaming
 5. **Command whitelist with RBAC** — Per-actor permissions
-6. **Drop POSIX reimplementation** — Real commands in sandbox
+6. **Drop POSIX reimplementation** — Real commands in playground
 7. **Auditor as dead man's switch** — Fail-safe supervision
 8. **Network gatekeepers** — Seatbelt + Proxy for URL filtering
 

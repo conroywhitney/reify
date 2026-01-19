@@ -165,4 +165,4 @@ Reify is an umbrella app with these sub-applications:
 
 > Have fun with it :)
 
-This is an experimental project exploring AI sandboxing with real filesystem control. Creativity and exploration are encouraged. When in doubt, write a test and try it out.
+This is an experimental project exploring AI playgrounds with real filesystem control. Creativity and exploration are encouraged. When in doubt, write a test and try it out.

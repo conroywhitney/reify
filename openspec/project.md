@@ -4,7 +4,7 @@
 
 ## Purpose
 
-A secure, reactive filesystem shell where human and AI operate in the same sandboxed environment. Files only exist if they're whitelisted. Commands only run if they're allowed. Everything is mediated, auditable, and fail-safe.
+A secure, reactive filesystem shell where human and AI operate in the same shared playground. Files only exist if they're whitelisted. Commands only run if they're allowed. Everything is mediated, auditable, and fail-safe.
 
 **Core Insight**: Helpful agents are more dangerous than malicious ones. A playground that says "yes" to safe things beats a prison that says "no" to everything.
 
@@ -67,11 +67,11 @@ A secure, reactive filesystem shell where human and AI operate in the same sandb
 ## Domain Context
 
 ### The 404 Principle
-Protected paths return "No such file or directory" NOT "Permission denied" — prevents probing attacks. Files outside the whitelist literally don't exist from the perspective of processes in the sandbox.
+Protected paths return "No such file or directory" NOT "Permission denied" — prevents probing attacks. Files outside the whitelist literally don't exist from the perspective of processes in the playground.
 
 ### Actor Types
 Different actors (human, agent, git, web) get different permissions:
-- **Human**: Full access (different sandbox)
+- **Human**: Full access (unrestricted playground)
 - **Agent**: Read whitelisted files, run whitelisted commands
 - **Git**: Access specific repos, not all of GitHub
 - **Web**: Blocklist + whitelist + HITL approval
@@ -89,7 +89,7 @@ Different actors (human, agent, git, web) get different permissions:
 ## Important Constraints
 
 - **Security First**: Every design decision prioritizes containment
-- **Fail-Safe**: If supervision fails, sandbox collapses to deny-all
+- **Fail-Safe**: If supervision fails, playground locks down to deny-all
 - **No Info Leak**: Even error messages shouldn't reveal protected paths
 - **Cross-Platform**: macOS (Seatbelt) and Linux (Landlock) support needed
 
