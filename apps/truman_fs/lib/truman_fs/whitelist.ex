@@ -30,16 +30,36 @@ defmodule TrumanFs.Whitelist do
   def new(paths) when is_list(paths) do
     table = :ets.new(:whitelist, [:set, :private])
 
-    for path <- paths do
-      normalized = normalize_path(path)
-      :ets.insert(table, {normalized, true})
-    end
+    # Batch insert is atomic - all paths are added in a single operation
+    entries = Enum.map(paths, fn path -> {normalize_path(path), true} end)
+    :ets.insert(table, entries)
 
     %__MODULE__{table: table}
   end
 
   @doc """
+  Deletes the whitelist and cleans up its ETS table.
+
+  Should be called when the whitelist is no longer needed to prevent
+  ETS table leaks, especially in tests.
+
+  ## Examples
+
+      iex> whitelist = TrumanFs.Whitelist.new(["/tmp"])
+      iex> TrumanFs.Whitelist.delete(whitelist)
+      :ok
+
+  """
+  @spec delete(t()) :: :ok
+  def delete(%__MODULE__{table: table}) do
+    :ets.delete(table)
+    :ok
+  end
+
+  @doc """
   Adds multiple paths to the whitelist at once.
+
+  This is an atomic operation - all paths are added in a single ETS insert.
 
   ## Examples
 
@@ -50,8 +70,10 @@ defmodule TrumanFs.Whitelist do
 
   """
   @spec add_all(t(), [String.t()]) :: t()
-  def add_all(%__MODULE__{} = whitelist, paths) when is_list(paths) do
-    Enum.reduce(paths, whitelist, &add(&2, &1))
+  def add_all(%__MODULE__{table: table} = whitelist, paths) when is_list(paths) do
+    entries = Enum.map(paths, fn path -> {normalize_path(path), true} end)
+    :ets.insert(table, entries)
+    whitelist
   end
 
   @doc """
@@ -77,6 +99,9 @@ defmodule TrumanFs.Whitelist do
   @doc """
   Removes multiple paths from the whitelist at once.
 
+  Note: Unlike `add_all/2`, this is not atomic - paths are removed one by one.
+  ETS doesn't support batch deletes with arbitrary keys.
+
   ## Examples
 
       iex> whitelist = TrumanFs.Whitelist.new(["/a", "/b", "/c"])
@@ -86,8 +111,12 @@ defmodule TrumanFs.Whitelist do
 
   """
   @spec remove_all(t(), [String.t()]) :: t()
-  def remove_all(%__MODULE__{} = whitelist, paths) when is_list(paths) do
-    Enum.reduce(paths, whitelist, &remove(&2, &1))
+  def remove_all(%__MODULE__{table: table} = whitelist, paths) when is_list(paths) do
+    Enum.each(paths, fn path ->
+      :ets.delete(table, normalize_path(path))
+    end)
+
+    whitelist
   end
 
   @doc """
