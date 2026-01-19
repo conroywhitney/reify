@@ -1,0 +1,22 @@
+[package]
+name = "truman_fused"
+version = "0.1.0"
+edition = "2024"
+description = "FUSE daemon for TrumanFS - whitelist-based filesystem visibility"
+
+[dependencies]
+# FUSE filesystem
+fuser = "0.15"
+
+# JSON for Port communication (audit-first logging requires human-readable format)
+serde_json = "1.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+
+# Error handling
+anyhow = "1.0"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"

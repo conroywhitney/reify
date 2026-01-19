@@ -69,32 +69,57 @@ This is the first component of the Truman stack. Other components (`truman_seatb
 
 ---
 
-### Decision 4: macFUSE vs FUSE-T
+### Decision 4: macFUSE with FSKit Backend
 
-**Choice**: Support both, prefer FUSE-T on macOS 12.3+
+**Choice**: Use macFUSE 5.1.3+ with FSKit backend on macOS 26+
 
 **Context**:
-- **macFUSE**: Mature, well-tested, but requires kernel extension (user must approve in System Settings)
-- **FUSE-T**: Uses newer macOS APIs (no kernel extension), but less mature
+- **macFUSE (old)**: Required kernel extension, user had to enable in System Settings
+- **FUSE-T**: Userspace FUSE, no kext, but limited `fuser` crate support
+- **macFUSE 5.1.3+ FSKit**: New backend runs entirely in userspace on macOS 26, no kext needed
 
-**Rationale**: FUSE-T is the future direction for macOS. Kernel extensions are being deprecated. But macFUSE has better compatibility and documentation. Support both, document tradeoffs.
+**Rationale**: macFUSE 5.1.3 (Dec 2025) added FSKit backend which gives us the best of both worlds: full `fuser` crate compatibility AND no kernel extension on macOS 26. Mount with `-o backend=fskit` for userspace mode.
 
 ---
 
-### Decision 5: Rust NIF for FUSE Bindings
+### Decision 5: Port over NIF for FUSE Daemon
 
-**Choice**: Write a Rust NIF that wraps the `fuser` crate
+**Choice**: Run Rust FUSE daemon as supervised Port, not NIF
 
 **Alternatives considered**:
-- **Existing Elixir FUSE library**: None mature enough
-- **Erlang port to C**: More complex FFI, memory safety concerns
-- **Pure Elixir**: Not possible, FUSE requires native code
+- **Rustler NIF**: Fast calls, shared memory, but NIF crash = BEAM crash
+- **Port (external process)**: Crash isolation, non-blocking, IPC overhead
 
-**Rationale**: Rust's `fuser` crate is well-maintained and handles the low-level FUSE protocol. Rustler makes Elixir NIFs straightforward. We get memory safety, good performance, and maintainable code.
+**Rationale**: FUSE operations are inherently async (kernel calls us). A Port is cleaner - the Rust daemon runs independently, sends events to Elixir via stdin/stdout. If the Rust process crashes, BEAM survives and can restart it. Supervision becomes straightforward OTP.
 
 ---
 
-### Decision 6: Passthrough Architecture
+### Decision 6: JSON Protocol for Audit-First Logging
+
+**Choice**: Use JSON for Port communication, not ETF (Erlang Term Format)
+
+**Alternatives considered**:
+- **ETF**: Native to Elixir, slightly faster, but binary blobs in logs
+- **JSON**: Human-readable, standard tooling, self-documenting logs
+- **MessagePack**: Binary but structured, middle ground
+
+**Rationale**: The Auditor's first action is to append raw bytes to the audit log BEFORE parsing. This "log first, parse second" pattern ensures no operation goes unrecorded. For this to work, the raw log must be readable without special decoders:
+
+```
+# With JSON Lines - immediately useful:
+$ tail audit.jsonl
+{"op":"getattr","path":"/home/user/secret.txt","req_id":42}
+
+# With ETF - need decoder:
+$ tail audit.log
+<<131,104,3,100,0,7,...>>  # What does this mean?
+```
+
+For forensics, compliance, and debugging, anyone can read JSON with `cat`, `grep`, `jq`. ETF requires trusting a decoder. The audit trail must be self-documenting.
+
+---
+
+### Decision 7: Passthrough Architecture
 
 **Choice**: Pass allowed operations through to real filesystem, filter disallowed ones
 
@@ -120,13 +145,13 @@ Users must install FUSE support manually (not bundled with macOS).
 
 ---
 
-### Risk: NIF Crashes Take Down BEAM VM
-A bug in the Rust NIF could crash the entire Erlang VM.
+### Risk: Port Process Crashes
+A bug in the Rust FUSE daemon could crash the external process.
 
 **Mitigation**:
-- Use Rustler's safe patterns
-- Extensive testing of the NIF
-- Consider running FUSE in a separate OS process and communicating via port (future optimization)
+- OTP supervision restarts the Port automatically
+- BEAM VM survives Port crashes (unlike NIFs)
+- Auditor logs capture state before crash for debugging
 
 ---
 
@@ -138,25 +163,39 @@ If the process that owns the ETS table crashes, the table is deleted.
 ## Module Structure
 
 ```
-apps/truman_fs/
-├── lib/
-│   ├── truman_fs.ex              # Public API
-│   ├── truman_fs/
-│   │   ├── application.ex       # OTP Application
-│   │   ├── whitelist.ex         # ETS-backed whitelist
-│   │   ├── fuse/
-│   │   │   ├── daemon.ex        # GenServer managing FUSE mount
-│   │   │   └── callbacks.ex     # FUSE operation handlers
-│   │   └── native.ex            # Rustler NIF module
-│   └── ...
-├── native/
-│   └── truman_fs_nif/            # Rust NIF using fuser crate
-│       ├── Cargo.toml
-│       └── src/
-│           └── lib.rs
-└── test/
-    ├── whitelist_test.exs
-    └── fuse_test.exs
+truman/
+├── apps/truman_fs/
+│   ├── lib/
+│   │   ├── truman_fs.ex              # Public API
+│   │   ├── truman_fs/
+│   │   │   ├── application.ex        # OTP Application
+│   │   │   ├── whitelist.ex          # ETS-backed whitelist
+│   │   │   ├── auditor.ex            # Critical path: log first, process second
+│   │   │   ├── handler.ex            # Process FUSE requests, check whitelist
+│   │   │   ├── port.ex               # GenServer wrapping Rust Port
+│   │   │   └── protocol.ex           # JSON message encode/decode
+│   │   └── ...
+│   └── test/
+│       ├── whitelist_test.exs
+│       └── auditor_test.exs
+│
+└── native/truman_fused/              # Rust FUSE daemon (separate binary)
+    ├── Cargo.toml
+    └── src/
+        ├── main.rs                   # Entry point, CLI args
+        ├── protocol.rs               # JSON message encode/decode
+        └── fuse.rs                   # FUSE callbacks using fuser crate
+```
+
+**Data flow:**
+```
+Kernel (FUSE) → Rust daemon → JSON/stdout → Elixir Port
+                                              ↓
+                                          Auditor (log first!)
+                                              ↓
+                                          Handler (whitelist check)
+                                              ↓
+                                          JSON/stdin → Rust → Kernel
 ```
 
 ## Open Questions
